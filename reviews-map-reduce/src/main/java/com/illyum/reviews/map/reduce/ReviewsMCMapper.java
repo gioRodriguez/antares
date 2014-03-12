@@ -13,7 +13,7 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 
-public class ReviewsMapper extends Mapper<LongWritable, Text, Text, Text> {
+public class ReviewsMCMapper extends Mapper<LongWritable, Text, Text, Text> {
 
 	public static final String IGNORE = "ignore";
 
@@ -44,6 +44,7 @@ public class ReviewsMapper extends Mapper<LongWritable, Text, Text, Text> {
 				reviewId = IGNORE;
 			}
 			reviewKey.set(reviewId);		
+			
 			reviewText.set(gson.toJson(reviews));
 			context.write(reviewKey, reviewText);
 		}				

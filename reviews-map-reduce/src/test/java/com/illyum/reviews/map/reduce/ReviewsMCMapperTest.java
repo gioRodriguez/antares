@@ -16,14 +16,14 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 
-public class ReviewsMapperTest {	
+public class ReviewsMCMapperTest {	
 	
 	private FileReader fileReader;
 	private BufferedReader reader;
 	
 	@Before
 	public void setUp() throws FileNotFoundException{
-		String reviewsFilePath = ReviewsMapperTest.class.getResource("/reviews-test.log").getPath();		
+		String reviewsFilePath = ReviewsMCMapperTest.class.getResource("/reviews-test.log").getPath();		
 		fileReader = new FileReader(reviewsFilePath);
 		reader = new BufferedReader(fileReader);
 	}
@@ -42,7 +42,7 @@ public class ReviewsMapperTest {
 		
 		ArgumentCaptor<Text> reviewKeyCaptor = ArgumentCaptor.forClass(Text.class);
 		ArgumentCaptor<Text> reviewBodyCaptor = ArgumentCaptor.forClass(Text.class);
-		ReviewsMapper reviewsMapper = new ReviewsMapper();
+		ReviewsMCMapper reviewsMapper = new ReviewsMCMapper();
 		LongWritable key = new LongWritable();
 		Text text = new Text(currentLine);
 		Context context = Mockito.mock(Context.class);
@@ -66,7 +66,7 @@ public class ReviewsMapperTest {
 		
 		ArgumentCaptor<Text> reviewKeyCaptor = ArgumentCaptor.forClass(Text.class);
 		ArgumentCaptor<Text> reviewBodyCaptor = ArgumentCaptor.forClass(Text.class);
-		ReviewsMapper reviewsMapper = new ReviewsMapper();
+		ReviewsMCMapper reviewsMapper = new ReviewsMCMapper();
 		LongWritable key = new LongWritable();
 		Text text = new Text(currentLine);
 		Context context = Mockito.mock(Context.class);
@@ -78,7 +78,7 @@ public class ReviewsMapperTest {
 		
 		// assert
 		assertEquals(expected, actual);
-		assertEquals(ReviewsMapper.IGNORE, reviewKeyCaptor.getValue().toString());
+		assertEquals(ReviewsMCMapper.IGNORE, reviewKeyCaptor.getValue().toString());
 	}
 	
 	@Test
@@ -91,7 +91,7 @@ public class ReviewsMapperTest {
 		
 		ArgumentCaptor<Text> reviewKeyCaptor = ArgumentCaptor.forClass(Text.class);
 		ArgumentCaptor<Text> reviewBodyCaptor = ArgumentCaptor.forClass(Text.class);
-		ReviewsMapper reviewsMapper = new ReviewsMapper();
+		ReviewsMCMapper reviewsMapper = new ReviewsMCMapper();
 		LongWritable key = new LongWritable();
 		Text text = new Text(currentLine);
 		Context context = Mockito.mock(Context.class);

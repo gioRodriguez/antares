@@ -19,7 +19,7 @@ public class ReviewsMain {
 		
 		job.setJobName("reviews job");
 		
-		job.setMapperClass(ReviewsMapper.class);
+		job.setMapperClass(ReviewsMCMapper.class);
 		job.setReducerClass(ReviewsReducer.class);
 		job.setNumReduceTasks(1);
 		
