@@ -33,6 +33,28 @@ public class ReviewsMCMapperTest {
 		this.reader.close();
 		this.fileReader.close();
 	}
+	
+	@Test
+	public void readLineForOtherMapperMap() throws IOException, InterruptedException {
+		// arrange
+		String expected = "{\"id\":130106125,\"sentiment\":\"Positive\",\"reviews\":[\"muy buena\",\"todo bien\",\"¡Excelente vendedor!\",\"EXCELENTE VENDEDOR 100% RECOMENDABLE\",\"La atención fue buena y rapida\",\"Muy buen vendedor, muy atento. La silla esta tal cual en la foto. recomendable\",\"El trato y atención excelentes. Lo único fue que el producto no trae descripción de ingredientes.\"]}";
+		reader.readLine();
+		reader.readLine();
+		reader.readLine();
+		String currentLine = reader.readLine();
+		
+		ReviewsMCMapper reviewsMapper = new ReviewsMCMapper();
+		LongWritable key = new LongWritable();
+		Text text = new Text(currentLine);
+		Context context = Mockito.mock(Context.class);
+		Mockito.doThrow(Exception.class).when(context).write(Mockito.any(Text.class), Mockito.any(Text.class));
+		
+		// act
+		reviewsMapper.map(key, text, context);
+		
+		// assert
+	}
+	
 
 	@Test
 	public void postivesMap() throws IOException, InterruptedException {

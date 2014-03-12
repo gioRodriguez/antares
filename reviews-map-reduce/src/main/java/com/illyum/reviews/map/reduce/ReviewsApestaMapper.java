@@ -13,21 +13,20 @@ import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 
-public class ReviewsMCMapper extends Mapper<LongWritable, Text, Text, Text> {
-
-	private static final String URL_PROTOTYPE = "GetUrlPrototype";
+public class ReviewsApestaMapper extends Mapper<LongWritable, Text, Text, Text> {
+	private static final String URL_APESTA = "GetUrlApestaPrototype";
+	private static final String APESTA_REVIEWS_SEPARATOR = " :";
 	public static final String IGNORE = "ignore";
 	
-
 	@Override
 	public void map(LongWritable key, Text text, Context context)
 			throws IOException, InterruptedException {
 		String htmlContent = text.toString();
-		String[] htmlSplited = htmlContent.split(";");
+		String[] htmlSplited = htmlContent.split(APESTA_REVIEWS_SEPARATOR);
 		
-		if(htmlSplited.length > 1 && htmlSplited[0].contains(URL_PROTOTYPE)){
+		if(htmlSplited.length > 1 && htmlSplited[0].contains(URL_APESTA)){
 			Reviews reviews = new Reviews();		
-			long id = extractId(htmlSplited[0]);
+			long id = extractId(htmlSplited[1]);
 			reviews.setId(id);
 
 			List<String> reviewList = extractReviews(htmlSplited);
@@ -35,8 +34,7 @@ public class ReviewsMCMapper extends Mapper<LongWritable, Text, Text, Text> {
 				reviews.addReview(review);
 			}
 			
-			Sentiment sentiment = extractSentiment(htmlSplited[1]);
-			reviews.setSentiment(sentiment);
+			reviews.setSentiment(Sentiment.Negative);
 			
 			Gson gson = new Gson();
 			Text reviewKey = new Text();
@@ -51,46 +49,35 @@ public class ReviewsMCMapper extends Mapper<LongWritable, Text, Text, Text> {
 			context.write(reviewKey, reviewText);
 		}				
 	}
-
+	
+	private long extractId(String htmlWithId) {
+		String[] htmlWithIdSplited = htmlWithId.trim().split(" ");
+		String idString = htmlWithIdSplited[0].trim();
+		if(!Strings.isNullOrEmpty(idString)){
+			return Long.parseLong(idString);
+		}
+		return -1;
+	}
+	
 	private List<String> extractReviews(String[] htmlSplited) {
 		List<String> reviewsList = new ArrayList<String>();
 		String safeHTML = Joiner.on(";").join(htmlSplited);
-		Iterable<String> reviewsRaw = Splitter.on("box_texto\">\"").trimResults().omitEmptyStrings().split(safeHTML);
+		Iterable<String> reviewsRaw = Splitter.on("<div class=\"blueField white\">").trimResults().omitEmptyStrings().split(safeHTML);
 		boolean ignoreFirts = false;
 		for (String reviewRaw : reviewsRaw) {
 			if(ignoreFirts){
-				reviewsList.add(reviewRaw.split("\"")[0].trim());
+				String reviewBody = reviewRaw.split("</div>")[0].trim();
+				while(reviewBody.contains("\u003ca class")){
+					int beginIgnore = reviewBody.indexOf("\u003ca class");
+					int endIgnore = reviewBody.indexOf("script\u003e");
+					String script = reviewBody.substring(beginIgnore - 1,  endIgnore + "script\u003e".length());
+					reviewBody = reviewBody.replace(script, "");
+				}
+				reviewsList.add(reviewBody);
 			}else{
 				ignoreFirts = true;
 			}
 		}
 		return reviewsList;
 	}
-
-	private Sentiment extractSentiment(String htmlWithSentiment) {	
-		htmlWithSentiment = htmlWithSentiment.trim().toLowerCase();
-		Sentiment sentiment = Sentiment.Negative;
-		switch (htmlWithSentiment.substring(0, 3)) {
-		case "pos":
-			sentiment = Sentiment.Positive;
-			break;
-		case "neg":
-			sentiment = Sentiment.Negative;
-			break;
-		case "neu":
-			sentiment = Sentiment.Neutral;
-			break;
-		}
-		return sentiment;
-	}
-
-	private long extractId(String htmlWithId) {
-		String[] htmlWithIdSplited = htmlWithId.split("-");
-		String idString = htmlWithIdSplited[htmlWithIdSplited.length - 1].trim();
-		if(!Strings.isNullOrEmpty(idString)){
-			return Long.parseLong(idString);
-		}
-		return -1;
-	}
-
 }
